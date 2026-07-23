@@ -1,0 +1,40 @@
+{% extends "base.html" %}
+{% block title %}지갑{% endblock %}
+{% block content %}
+<h2>내 지갑</h2>
+<p>현재 잔액: <strong>{{ "{:,}".format(user.balance) }}원</strong></p>
+
+<h3>충전</h3>
+<form method="post" action="{{ url_for('wallet_charge') }}">
+  <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+  충전 금액 (원): <input type="number" name="amount" min="1" max="1000000" step="1" required>
+  <button type="submit">충전하기</button>
+</form>
+
+<h3>송금</h3>
+<form method="post" action="{{ url_for('wallet_transfer') }}">
+  <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+  받는 사람 아이디: <input type="text" name="recipient" maxlength="20" required><br>
+  송금 금액 (원): <input type="number" name="amount" min="1" max="1000000" step="1" required><br>
+  <button type="submit">송금하기</button>
+</form>
+
+<h3>거래 내역</h3>
+<table border="1" cellpadding="4">
+  <tr><th>시간</th><th>종류</th><th>상대방</th><th>금액</th></tr>
+  {% for t in history %}
+    <tr>
+      <td>{{ t.created_at.strftime('%Y-%m-%d %H:%M:%S') }}</td>
+      {% if t.type == 'charge' %}
+        <td>충전</td><td>-</td><td>+{{ "{:,}".format(t.amount) }}원</td>
+      {% elif t.to_user_id == user.id %}
+        <td>받음</td><td>{{ others.get(t.from_user_id, '알 수 없음') }}</td><td>+{{ "{:,}".format(t.amount) }}원</td>
+      {% else %}
+        <td>보냄</td><td>{{ others.get(t.to_user_id, '알 수 없음') }}</td><td>-{{ "{:,}".format(t.amount) }}원</td>
+      {% endif %}
+    </tr>
+  {% else %}
+    <tr><td colspan="4">거래 내역이 없습니다.</td></tr>
+  {% endfor %}
+</table>
+{% endblock %}

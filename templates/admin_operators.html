@@ -1,0 +1,30 @@
+{% extends "base.html" %}
+{% block title %}운영자 등급 관리{% endblock %}
+{% block content %}
+<h2>운영자 등급 관리 (최고관리자 전용)</h2>
+<p><a href="{{ url_for('admin_dashboard') }}">&larr; 대시보드로</a></p>
+
+<h3>운영자 지정</h3>
+<form method="post" action="{{ url_for('admin_promote_operator') }}">
+  <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+  사용자 아이디: <input type="text" name="username" maxlength="20" required>
+  <button type="submit">운영자로 지정</button>
+</form>
+
+<h3>현재 운영자/관리자 목록</h3>
+<table border="1" cellpadding="6">
+  <tr><th>아이디</th><th>등급</th><th>관리</th></tr>
+  {% for o in operators %}
+    <tr>
+      <td>{{ o.username }}</td>
+      <td>{{ '최고관리자' if o.role == 'admin' else '운영자' }}</td>
+      <td>
+        <form method="post" action="{{ url_for('admin_demote_operator', user_id=o.id) }}" style="display:inline">
+          <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+          <button type="submit" onclick="return confirm('등급을 해제하시겠습니까?')">등급 해제</button>
+        </form>
+      </td>
+    </tr>
+  {% endfor %}
+</table>
+{% endblock %}

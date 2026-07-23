@@ -1,0 +1,54 @@
+{% extends "base.html" %}
+{% block title %}{{ other.username }}님과의 채팅{% endblock %}
+{% block content %}
+<h2>{{ other.username }}님과의 채팅</h2>
+<p><a href="{{ url_for('report') }}?target_type=user&target_id={{ other.id }}">이 사용자 신고하기</a></p>
+<div id="chat">
+  <ul id="messages"></ul>
+  <input id="chat_input" type="text" placeholder="메시지를 입력하세요 (최대 500자)" maxlength="500">
+  <button onclick="sendMessage()">전송</button>
+  <p id="chat_error" style="color:red;"></p>
+</div>
+
+<script type="text/javascript">
+  var socket = io();
+  var messagesEl = document.getElementById('messages');
+  var otherUserId = {{ other.id | tojson }};
+
+  function appendMessage(username, message, timestamp) {
+    var item = document.createElement('li');
+    item.textContent = "[" + timestamp + "] " + username + ": " + message;
+    messagesEl.appendChild(item);
+    messagesEl.scrollTop = messagesEl.scrollHeight;
+  }
+
+  var history = [
+    {% for m in history %}
+      {username: {{ m.sender.username | tojson }}, message: {{ m.content | tojson }}, timestamp: {{ m.created_at.strftime('%H:%M:%S') | tojson }}},
+    {% endfor %}
+  ];
+  history.forEach(function(m) { appendMessage(m.username, m.message, m.timestamp); });
+
+  socket.on('connect', function() {
+    socket.emit('join', {room_type: 'dm', other_user_id: otherUserId});
+  });
+
+  socket.on('new_message', function(data) {
+    appendMessage(data.username, data.message, data.timestamp);
+  });
+
+  socket.on('chat_error', function(data) {
+    document.getElementById('chat_error').textContent = data.message;
+    setTimeout(function() { document.getElementById('chat_error').textContent = ""; }, 3000);
+  });
+
+  function sendMessage() {
+    var input = document.getElementById('chat_input');
+    var message = input.value;
+    if (message.trim()) {
+      socket.emit('send_message', { room_type: 'dm', other_user_id: otherUserId, message: message });
+      input.value = "";
+    }
+  }
+</script>
+{% endblock %}

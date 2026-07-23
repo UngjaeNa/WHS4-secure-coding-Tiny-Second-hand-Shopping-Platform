@@ -1,0 +1,28 @@
+{% extends "base.html" %}
+{% block title %}유저 관리{% endblock %}
+{% block content %}
+<h2>유저 관리</h2>
+<p><a href="{{ url_for('admin_dashboard') }}">&larr; 대시보드로</a></p>
+<table border="1" cellpadding="6">
+  <tr><th>아이디</th><th>등급</th><th>상태</th><th>관리</th></tr>
+  {% for u in users %}
+    <tr>
+      <td>{{ u.username }}</td>
+      <td>{{ u.role }}</td>
+      <td>{{ u.status }}</td>
+      <td>
+        {% if u.role == 'user' %}
+          <form method="post" action="{{ url_for('admin_toggle_user_status', user_id=u.id) }}" style="display:inline">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+            <button type="submit">
+              {{ '정지 해제' if u.status == 'suspended' else '정지' }}
+            </button>
+          </form>
+        {% else %}
+          -
+        {% endif %}
+      </td>
+    </tr>
+  {% endfor %}
+</table>
+{% endblock %}

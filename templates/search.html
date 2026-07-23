@@ -1,0 +1,38 @@
+{% extends "base.html" %}
+{% block title %}상품 검색{% endblock %}
+{% block content %}
+<h2>상품 검색</h2>
+<form method="get" action="{{ url_for('search') }}">
+  키워드: <input type="text" name="q" maxlength="100" value="{{ q }}"><br>
+  최소 가격: <input type="number" name="min_price" min="0" value="{{ min_price if min_price is not none else '' }}">
+  최대 가격: <input type="number" name="max_price" min="0" value="{{ max_price if max_price is not none else '' }}"><br>
+  판매자 아이디: <input type="text" name="seller" maxlength="20" value="{{ seller }}"><br>
+  상태:
+  <select name="status">
+    <option value="active" {% if status == 'active' %}selected{% endif %}>판매중</option>
+    <option value="sold" {% if status == 'sold' %}selected{% endif %}>거래완료</option>
+  </select><br>
+  <button type="submit">검색</button>
+</form>
+
+<h3>검색 결과</h3>
+<ul>
+  {% for product in products %}
+    <li>
+      <a href="{{ url_for('view_product', product_id=product.id) }}">{{ product.title }}</a>
+      - {{ "{:,}".format(product.price) }}원
+    </li>
+  {% else %}
+    <li>검색 결과가 없습니다.</li>
+  {% endfor %}
+</ul>
+
+<p>
+  {% if page > 1 %}
+    <a href="{{ url_for('search', q=q, seller=seller, status=status, min_price=min_price, max_price=max_price, page=page-1) }}">이전 페이지</a>
+  {% endif %}
+  {% if has_more %}
+    <a href="{{ url_for('search', q=q, seller=seller, status=status, min_price=min_price, max_price=max_price, page=page+1) }}">다음 페이지</a>
+  {% endif %}
+</p>
+{% endblock %}
