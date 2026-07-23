@@ -34,8 +34,8 @@ miniconda(또는 anaconda)가 없다면 먼저 설치하세요.
 https://docs.anaconda.com/free/miniconda/index.html
 
 ```bash
-git clone https://github.com/ugonfor/secure-coding
-cd secure-coding
+git clone https://github.com/UngjaeNa/WHS4-secure-coding-Tiny-Second-hand-Shopping-Platform
+cd WHS4-secure-coding-Tiny-Second-hand-Shopping-Platform
 conda env create -f enviroments.yaml
 conda activate secure_coding
 ```
